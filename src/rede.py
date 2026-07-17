@@ -81,6 +81,11 @@ class RedeNeural:
             tuple: (letra, confiança) - Ex: ('A', 0.95)
         """
         saidas = self.forward(entrada)
+        
+        # Verifica NaN
+        if any(math.isnan(s) for s in saidas):
+            return 'X', 0.0
+        
         indice_maximo = saidas.index(max(saidas))
         confianca = saidas[indice_maximo]
         letra = chr(ord('A') + indice_maximo)
@@ -97,8 +102,10 @@ class RedeNeural:
             float: Valor do erro
         """
         saida = self.camadas[-1].saidas[alvo]
-        # Evita log(0)
+        # Evita log(0) e NaN
         saida = max(1e-7, min(1 - 1e-7, saida))
+        if math.isnan(saida) or math.isinf(saida):
+            return 10.0  # Erro grande padrão
         return -math.log(saida)
     
     def salvar_pesos(self, caminho='pesos.json'):
