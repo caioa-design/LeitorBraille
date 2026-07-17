@@ -21,6 +21,7 @@ class Camada:
         self.neuronios = [Neuronio(num_entradas) for _ in range(num_neuronios)]
         self.saidas = []
         self.entradas = []
+        self.entradas_brutas = []  # Para armazenar valores antes da ativação
     
     def forward(self, entradas):
         """
@@ -34,11 +35,13 @@ class Camada:
         """
         self.entradas = entradas
         self.saidas = []
+        self.entradas_brutas = []
         
         if self.ativacao == 'relu':
             for neuronio in self.neuronios:
                 entrada_ponderada = sum(e * p for e, p in zip(entradas, neuronio.pesos)) + neuronio.bias
                 neuronio.entrada = entrada_ponderada
+                self.entradas_brutas.append(entrada_ponderada)
                 neuronio.saida = max(0, entrada_ponderada)  # ReLU
                 self.saidas.append(neuronio.saida)
         
@@ -49,6 +52,8 @@ class Camada:
                 entrada_ponderada = sum(e * p for e, p in zip(entradas, neuronio.pesos)) + neuronio.bias
                 neuronio.entrada = entrada_ponderada
                 entradas_brutas.append(entrada_ponderada)
+            
+            self.entradas_brutas = entradas_brutas
             
             # Aplica softmax
             max_entrada = max(entradas_brutas)
@@ -77,6 +82,15 @@ class Camada:
         Returns:
             list: Deltas para a camada anterior
         """
+        # Aplica derivada de ativação nos deltas (para ReLU)
+        if self.ativacao == 'relu':
+            deltas_com_derivada = []
+            for i, delta in enumerate(deltas):
+                # Derivada de ReLU: 1 se entrada > 0, 0 caso contrário
+                derivada = 1 if self.entradas_brutas[i] > 0 else 0
+                deltas_com_derivada.append(delta * derivada)
+            deltas = deltas_com_derivada
+        
         for i, neuronio in enumerate(self.neuronios):
             neuronio.delta = deltas[i]
             neuronio.atualizar_pesos(self.entradas, taxa_aprendizado)
