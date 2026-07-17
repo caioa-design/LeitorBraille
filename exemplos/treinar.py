@@ -20,14 +20,15 @@ def main():
     # Cria a rede
     rede = RedeNeural(arquitetura=[6, 12, 26])
     
-    # Cria o treinador
-    treinador = Treinador(rede, taxa_aprendizado=0.5)
+    # Cria o treinador com taxa de aprendizado reduzida
+    treinador = Treinador(rede, taxa_aprendizado=0.1)
     
     # Obtém dados de treinamento
     dados = obter_dados_treinamento()
     
     print(f"Arquitetura da rede: 6 entradas → 12 ocultos → 26 saídas")
     print(f"Dados de treinamento: {len(dados)} letras do alfabeto Braille")
+    print(f"Taxa de aprendizado: 0.1")
     print()
     
     # Treina
